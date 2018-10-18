@@ -1,4 +1,3 @@
-# squiroga6.github.io
 ## Intro to Machine Learning Final Project
 
 * machine_learning_project.rmd : markdown document with code to generate the html file
