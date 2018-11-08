@@ -12,4 +12,5 @@ https://squiroga6.github.io/machine_learning_project2
 * my_frst_leaflet.Rmd : markdown document with code to generate the html file
 
 * my_frst_leaflet.html : The html output of the final project assignment can be viewed here:
+https://squiroga6.github.io/my_frst_leaflet
 
