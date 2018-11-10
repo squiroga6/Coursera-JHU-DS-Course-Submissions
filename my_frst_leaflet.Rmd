@@ -1,0 +1,90 @@
+---
+title: "My First Leaflet Map - Developing Data Products"
+author: "Samuel Quiroga"
+date: "November 7, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(leaflet)
+library(DT)
+library(htmltools)
+```
+
+## Assignment One - Developing Data Products
+
+This is Assignment One, Developing Data Products of the Data Science Specialization in Coursera. This document outlines how to create a simple map using the `leaflet` package in R.
+
+### Data to Visualize
+
+For this assignment we'll use greenhouse gas emissions data from the Greenhouse Gas Reporting Program in the Government of Canada website. The Greenhouse Gas Reporting Program (GHGRP) collects information on greenhouse gas (GHG) emissions annually from facilities across Canada. It is a mandatory program for those who meet the requirements. For more information, check out the website at [https://climate-change.canada.ca/facility-emissions]
+
+Facilities that emit 50 kilotonnes or more of GHGs, in carbon dioxide (CO2) equivalent (eq.) units, per year must report their emissions to Environment and Climate Change Canada. For this assignment we'll focus on the western provinces of Alberta and Britsh Columbia.
+
+Note: Data expressed in CO2 eq. units use the most recently revised global warming potential (GWP) values used internationally for GHG reporting.
+
+### Getting and Cleaning Data
+
+The data is read using `read.csv` function in R. The column names are cleaned and the french version of the name removed. Here we are just focused on the facility name, company name, and description. The greenhouse gas emissions are the Total Emissions by Tonnnes of CO2 equivalent.
+
+```{r}
+# set url of the data
+my.url <- "http://data.ec.gc.ca/data/substances/monitor/greenhouse-gas-reporting-program-ghgrp-facility-greenhouse-gas-ghg-data/PDGES-GHGRP-GHGEmissionsGES-2004-Present.csv"
+# read data
+ghg <- read.csv(my.url)
+# get names
+names <- colnames(ghg)
+# clean column names (remove French version)
+my.names <- if_else(is.na(str_extract(names,".*(?=\\.\\.\\.)")),names,str_extract(names,".*(?=\\.\\.\\.)"))
+colnames(ghg) <- my.names
+# Select rows of interest
+my.ghg <- ghg %>% select(Facility.Name,
+                         Latitude,Longitude,
+                         English.Facility.NAICS.Code.Description, 
+                         Facility.Province.or.Territory,
+                         Reporting.Company.Legal.Name,
+                         Total.Emissions..tonnes.CO2e.) %>% 
+        # remove na values and filter location based on name and lat long
+        filter(complete.cases(Latitude),
+               Facility.Province.or.Territory %in% c("British Columbia","Alberta"),
+               Latitude > 49, Longitude < -109) %>%
+        mutate(Total.Emissions..tonnes.CO2e. = round(if_else(Total.Emissions..tonnes.CO2e. == 0,1,Total.Emissions..tonnes.CO2e.),1))
+
+# view table
+datatable(my.ghg,options = list(scrollX=TRUE,pageLength = 5))
+```
+
+### Build Leaflet Map
+
+Here, we'll use `leaflet` package in R to plot the emissions data on a map. We'll identify each facility with a circle and color based on the amount of total CO2 emissions. The popups include the facility names and the names of the associated company that owns the facilities, and the actual amount of CO2 emissions in tons. 
+
+```{r, fig.width=9,fig.height=8}
+# define color palette
+pal <- colorNumeric("YlOrRd",domain = log10(my.ghg$Total.Emissions..tonnes.CO2e.))
+# define popup information
+labs <- lapply(seq(nrow(my.ghg)), function(i) {
+  paste0( '<p>', my.ghg[i, "Facility.Name"], '<p></p>', 
+          my.ghg[i, "English.Facility.NAICS.Code.Description"], ', ', 
+          my.ghg[i, "Reporting.Company.Legal.Name"],'</p><p>', 
+          my.ghg[i, "Total.Emissions..tonnes.CO2e."], '</p>' ) 
+})
+# define leaflet parameters
+my.map <- my.ghg  %>% 
+        leaflet() %>% 
+        addTiles() %>% 
+        addCircleMarkers(lng = ~Longitude,
+                   lat = ~Latitude,
+                   label = lapply(labs, HTML),
+                   weight = 1,
+                   color = ~pal(log10(my.ghg$Total.Emissions..tonnes.CO2e.))) %>%
+        addLegend("bottomright", pal = pal, values = ~log10(my.ghg$Total.Emissions..tonnes.CO2e.),
+                  title = "Total Emissions<br>(log10 of Tons CO2)",
+                  opacity = 0.8)
+
+my.map
+```
+
