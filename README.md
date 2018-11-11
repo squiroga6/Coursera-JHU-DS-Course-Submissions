@@ -14,3 +14,4 @@ https://squiroga6.github.io/machine_learning_project2
 * my_frst_leaflet.html : The html output of the final project assignment can be viewed here:
 https://squiroga6.github.io/my_frst_leaflet
 
+* For the presentation slides of Plotly see : https://squiroga6.github.io/my_frst_plotly_presentation
