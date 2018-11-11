@@ -1,0 +1,65 @@
+---
+title: "My Plotly Presentation"
+author: "Samuel Quiroga"
+date: "November 10, 2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(plotly)
+library(DT)
+```
+
+## Assignment Two - Developing Data Products
+
+This is Assignment Two, Developing Data Products of the Data Science Specialization in Coursera. This document outlines how to create a simple plot using the `plotly` package in R.
+
+## Data to Visualize
+
+For this assignment we'll use greenhouse gas emissions data from the Greenhouse Gas Reporting Program in the Government of Canada website. 
+
+The Greenhouse Gas Reporting Program (GHGRP) collects information on greenhouse gas (GHG) emissions annually from facilities across Canada. It is a mandatory program for those who meet the requirements. For more information, check out the website at [https://climate-change.canada.ca/facility-emissions]
+
+## The Plot with Plotly
+
+```{r}
+# set url of the data
+my.url <- "http://data.ec.gc.ca/data/substances/monitor/greenhouse-gas-reporting-program-ghgrp-facility-greenhouse-gas-ghg-data/PDGES-GHGRP-GHGEmissionsGES-2004-Present.csv"
+# read data
+ghg <- read.csv(my.url)
+# get names
+names <- colnames(ghg)
+# clean column names (remove French version)
+my.names <- if_else(is.na(str_extract(names,".*(?=\\.\\.\\.)")),names,str_extract(names,".*(?=\\.\\.\\.)"))
+colnames(ghg) <- my.names
+# Select rows of interest
+my.ghg <- ghg %>% select(Facility.Province.or.Territory,
+                         Reference.Year,
+                         Total.Emissions..tonnes.CO2e.) %>%
+        mutate(Reference.Year = as.Date(Reference.Year,format = "%Y"),
+                Total.Emissions..tonnes.CO2e. = 
+                       round(if_else(Total.Emissions..tonnes.CO2e. == 0,1,Total.Emissions..tonnes.CO2e.),1)) %>%
+        filter(complete.cases(.))
+
+p <- plot_ly(data = my.ghg, 
+             x=~Reference.Year,
+             y=~Total.Emissions..tonnes.CO2e.,
+             type="bar",
+             name=~Facility.Province.or.Territory,
+             colors = "YlOrRd") %>%
+        layout(yaxis=list(title="Total greenhouse gas emissions (tonnes CO2 eq.)"),barmode="stack")
+
+p
+```
+
+## The table of values 
+
+```{r}
+sum.ghg <- my.ghg %>% 
+        group_by(Facility.Province.or.Territory,Reference.Year) %>% 
+        summarize(Sum.per.Province = sum(sum(Total.Emissions..tonnes.CO2e.)))
+# view table
+datatable(sum.ghg,options = list(scrollX=TRUE,pageLength = 5))
+```
