@@ -1,0 +1,76 @@
+---
+title: "Canada's Greenhouse Gas Emissions"
+author: "Samuel Quiroga"
+date: "November 18, 2018"
+output: ioslides_presentation
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(leaflet)
+library(tidyverse)
+library(plotly)
+library(DT)
+```
+
+## Canada's Greenhouse Gas Emissions Reporting Program {.smaller}
+
+The Shiny application uses Facility Greenhouse Gas (GHG) Data from the governmet of Canada's Greenhouse Gas Reporting Program (GHGRP). For more information, click [here](https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823).
+
+The interative map displays the locations of facilities with reported green-house gas emissions and allows the user to choose a province from the dropdown menu. The map will then zoom in to the chosen province. It will also update the plots based on the chosen province and zoomed in area.
+
+Further ore, the tab called *Data Explorer* displays a table of more details regarding the greenhouse gas emissions and is instantly updated as the user zoomes into the map. So it only displays information about what's currently being viewed in the map. Try it out!
+
+## Interactive Map {.smaller}
+
+The Shiny application makes use of `leaflet` pacakge to display the interactive map. Here is an example of what a simple version of the map would look like for a subset of the data:
+
+```{r, echo=T,fig.height=2}
+ghg <- read_rds(path = "./ghgData.rds")
+
+ghg.ontario <- ghg %>% 
+        filter(Facility.Province.or.Territory=="Ontario") %>% 
+        filter(complete.cases(Latitude))
+
+ghg.ontario %>% leaflet() %>% addTiles() %>% 
+        addCircleMarkers(lng = ~Longitude, lat = ~Latitude,popup = ~Facility.Name)
+```
+
+## Historic Emission Trends {.smaller}
+
+In the Shiny app, when the user selects a specific province or territory, the plots in the Shiny application get automatically updated. Here is an example of a bar plot that displays the amount of green-house gas emissions for each province (similar to what will appear in the shiny app, exept for a scatter plot).
+
+```{r cars, echo = F}
+my.ghg <- ghg %>% select(Facility.Province.or.Territory,
+                         Reference.Year,
+                         Total.Emissions..tonnes.CO2e.) %>%
+        mutate(Reference.Year = as.Date(Reference.Year,format = "%Y"),
+                Total.Emissions..tonnes.CO2e. = 
+                       round(if_else(Total.Emissions..tonnes.CO2e. == 0,1,Total.Emissions..tonnes.CO2e.),1)) %>%
+        filter(complete.cases(.))
+
+
+p <- plot_ly(data = my.ghg, 
+             x=~Reference.Year,
+             y=~Total.Emissions..tonnes.CO2e.,
+             type="bar",
+             name=~Facility.Province.or.Territory,
+             colors = "YlOrRd") %>%
+        layout(yaxis=list(title="Total greenhouse gas emissions (tonnes CO2 eq.)"),barmode="stack")
+
+p
+```
+
+## Data Explorer {.smaller}
+
+Finally, the *Data Explorer* tab in the Shiny App shows a table of the greenhouse gas data with more details. A nice feature of this application is that the table is instantly filtered to only display data that is currently viewed in the *Interactive Map* tab. Here is an example of the summary table grouped by province showing the total amoint of CO2 eq. gas emissions.
+
+```{r pressure}
+sum.ghg <- my.ghg %>% 
+        group_by(Facility.Province.or.Territory,Reference.Year) %>% 
+        summarize(Sum.per.Province = sum(sum(Total.Emissions..tonnes.CO2e.)))
+# view table
+datatable(sum.ghg,options = list(scrollX=TRUE,pageLength = 5))
+```
+
