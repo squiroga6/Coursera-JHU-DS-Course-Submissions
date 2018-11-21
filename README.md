@@ -2,12 +2,12 @@
 
 ### Intro to Machine Learning Final Project
 
-* machine_learning_project2.html : The html output of the final project assignment can be viewed in
+* The html output of the final project assignment can be viewed in
 https://squiroga6.github.io/machine_learning_project2
 
 ### Developing Data products
 
-* my_frst_leaflet.html : The html output of the final project assignment can be viewed here:
+* The html output of the final project assignment using Leaflet package can be viewed here:
 https://squiroga6.github.io/my_frst_leaflet
 
-* For the presentation slides of Plotly see : https://squiroga6.github.io/my_frst_plotly_presentation
+* For the presentation slides using plotly can be seen in : https://squiroga6.github.io/my_frst_plotly_presentation
