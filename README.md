@@ -21,3 +21,8 @@ https://squiroga6.github.io/my_frst_leaflet
 ### Milestone Report (Week 2)
 
 * The html output of the first Milestone Report can be found here : https://squiroga6.github.io/data_science_capstone_milestone_report
+
+### Capstone Application
+
+* The presentation for the app pitch can be found here : https://squiroga6.github.io/data_science_capstone_pitch#1
+* The link to the app can be found here: https://squiroga.shinyapps.io/capstone_app/
