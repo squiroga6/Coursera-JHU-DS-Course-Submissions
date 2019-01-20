@@ -24,5 +24,5 @@ https://squiroga6.github.io/my_frst_leaflet
 
 ### Capstone Application
 
-* The presentation for the app pitch can be found here : https://squiroga6.github.io/data_science_capstone_pitch#1
-* The link to the app can be found here: https://squiroga.shinyapps.io/capstone_app/
+* The presentation for the app pitch can be found here : https://squiroga6.github.io/data_science_capstone_pitchv2.html
+* The link to the app can be found here: https://squiroga.shinyapps.io/capstone_final_app/
