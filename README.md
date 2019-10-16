@@ -1,4 +1,4 @@
-## Assignments Submitted for the Data Science Specilization in Coursera
+## Assignments Submitted for the Data Science Specialization in Coursera
 
 ### Intro to Machine Learning Final Project
 
